@@ -2,16 +2,17 @@ const User = require("../model/user.model");
 const Todo = require("../model/todo.model");
 
 exports.addTodo = async function (req, res) {
-    const { body, title } = req.body;
+    const { body } = req.body;
 
-    if (!body || !title) {
-        return res.status(400).json({ msg: "body and title is missing !!" });
+    console.log(body);
+
+    if (!body) {
+        return res.status(400).json({ msg: "body is missing !!" });
     }
 
     try {
         let todo = await Todo.create({
             owner: req.user._id,
-            title,
             body
         });
 

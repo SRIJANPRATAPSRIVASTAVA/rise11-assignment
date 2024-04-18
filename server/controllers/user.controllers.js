@@ -88,7 +88,7 @@ exports.login = async function (req, res) {
             const { password, ...details } = userExists._doc;
             return res.status(200).json({
                 "message": "logged in succesfully",
-                userExists,
+                details,
                 token
             });
         }

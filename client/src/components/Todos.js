@@ -21,7 +21,6 @@ const Todos = () => {
     useEffect(() => {
         const userInfo = JSON.parse(localStorage.getItem("userInfo"));
         setUser(userInfo);
-        console.log(user);
         if (!userInfo) navigate("/");
 
         const fetchTodos = async () => {
@@ -46,9 +45,9 @@ const Todos = () => {
         fetchTodos();
 
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [navigate]);
+    }, [navigate, fetchAgain]);
 
-    const addItem = () => {
+    const addItem = async () => {
         if (!inputData) {
             alert("Please fill the task !!")
         } else if (inputData && !toggle) {
@@ -60,6 +59,20 @@ const Todos = () => {
                     return todo;
                 })
             )
+
+            const config = {
+                headers: {
+                    Authorization: `Bearer ${user.token}`,
+                },
+            };
+
+            const { data } = await axios.patch(
+                `http://localhost:5531/api/v1/updatetodo/${iseditItem}`,
+                {
+                    "body": inputData,
+                },
+                config
+            );
             setToggle(true);
             setinputData('');
             setIseditItem(null);
@@ -69,13 +82,48 @@ const Todos = () => {
             const dataObject = {
                 _id: new Date().getTime().toString(), body: inputData
             }
+            try {
+                const config = {
+                    headers: {
+                        Authorization: `Bearer ${user.token}`,
+                    },
+                };
+
+                const { data } = await axios.post(
+                    "http://localhost:5531/api/v1/addToDo",
+                    {
+                        "body": inputData,
+                    },
+                    config
+                );
+                setFetchAgain(!fetchAgain)
+                setLoading(false);
+            } catch (error) {
+                console.log("error in adding todo");
+            }
             setTodos([...todos, dataObject]);
             setinputData('');
         }
     }
 
-    const deleteItem = (ind) => {
-        setTodos(todos => todos.filter((todo) => todo._id !== ind));
+    const deleteItem = async (ind) => {
+        try {
+            setLoading(true)
+            const config = {
+                headers: {
+                    Authorization: `Bearer ${user.token}`,
+                },
+            };
+
+            const { data } = await axios.delete(
+                `http://localhost:5531/api/v1/deletetodo/${ind}`,
+                config
+            );
+            setFetchAgain(!fetchAgain)
+            setLoading(false);
+        } catch (error) {
+            console.log("error in deleting todo");
+        }
     }
 
     const editItem = (id) => {
@@ -110,7 +158,8 @@ const Todos = () => {
                             !loading && todos && todos?.map((elem) => {
                                 return (
                                     <div className="eachItem" key={elem._id}>
-                                        <h3>{elem.body}</h3>
+                                        <h3>{elem.body.substring(0, 20)}
+                                            {elem.body.length > 20 ? "..." : <></>}</h3>
                                         <div className="todo-btn">
                                             <i className='far fa-edit add-btn' title='Update Item' onClick={() => editItem(elem._id)}></i>
                                             <i className='far fa-trash-alt add-btn' title='Delete Item' onClick={() => deleteItem(elem._id)}></i>
@@ -122,8 +171,11 @@ const Todos = () => {
                     </div>
 
                     <div className="showItems">
-                        <button className='btn effect04' data-sm-link-text="Remove All" onClick={() => setTodos([])}>
-                            <span>CHECK LIST</span>
+                        <button className='btn effect04' data-sm-link-text="Now" onClick={() => {
+                            localStorage.removeItem("userInfo");
+                            navigate('/');
+                        }}>
+                            <span>Sign Out</span>
                         </button>
                     </div>
                 </div>
