@@ -20,7 +20,6 @@ const SignUp = () => {
   const handleSubmit = async (e) => {
     e.preventDefault()
     setLoading(true);
-    console.log(username, email, password);
     if (!username || !email || !password) {
       setLoading(false);
       return;
@@ -40,7 +39,6 @@ const SignUp = () => {
         },
         config
       );
-      console.log("here", data);
       localStorage.setItem("userInfo", JSON.stringify(data));
       navigate("/todos");
       setLoading(false);

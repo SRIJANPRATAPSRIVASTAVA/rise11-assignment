@@ -70,7 +70,6 @@ exports.updateTodo = async function (req, res) {
 exports.fetchAllTodo = async function (req, res) {
     try {
         const user = await User.findById(req.user._id).populate('todos', "_id body");
-        console.log("myuser", user.todos);
         const todos = user.todos;
         res.status(200).json({ todos });
     } catch (error) {
